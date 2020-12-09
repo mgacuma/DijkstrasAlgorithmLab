@@ -19,20 +19,20 @@ int main() {
 
 	int r = 0, c = 0, A = 65, i, j, k, len, iroot, itarget, adder, min, next;
 	
+	//Initialize visited array
 	for (i = 0; i < 26; i++) {
 		visited[i] = ' ';
 	}
 
+	//Open File
 	err = fopen_s(&fptr, "C:\\Users\\Miguel\\source\\repos\\DijkstraLab\\DijkstraLab\\input.txt", "r");
-	
-	
 	if (err != 0) {
 		printf("\nINPUT FILE NOT FOUND.\n");
 		exit(1);
 	}
 
+	//Read file and display cost matrix
 	printf("\t\t| Routing Table |\n\n");
-	
 	fgets(buff, 255, fptr);
 	printf("%s", buff);
 
@@ -47,36 +47,34 @@ int main() {
 		}
 		else break;
 	}
-	r = c;
 	len = c;
 
-	//printf("\n\n[%d]\n\n", c); CHECK
 
 	r = 0;
 	c = 0;
 
+	//Fill distances array with values
 	while (!feof(fptr)) {
-fgets(buff, 255, fptr);
-printf("%s", buff);
+	fgets(buff, 255, fptr);
+	printf("%s", buff);
+		for (i = 0; i < 255; i++) {
+			if (buff[i] != '\0') {
+				if (buff[i] >= '0' && buff[i] <= '9') {
+					arr[r][c] = buff[i] - '0';
+					c++;
 
-for (i = 0; i < 255; i++) {
-	if (buff[i] != '\0') {
-		if (buff[i] >= '0' && buff[i] <= '9') {
-			arr[r][c] = buff[i] - '0';
-			c++;
-
+				}
+			}
+			else break;
 		}
+	r++;
+	c = 0;
 	}
-	else break;
-}
-r++;
-c = 0;
-	}
-
 
 	i = 0;
 	j = 0;
 
+	//Change missing array values to infinity
 	for (i = 0; i < len; i++) {
 		for (j = 0; j < len; j++) {
 			if (arr[i][j] == 0) {
@@ -86,27 +84,21 @@ c = 0;
 	}
 
 	printf("\n\n");
-	/* CHECK ARRAY CONTENTS
-	for (i = 0; i < len; i++) {
-		for (j = 0; j < len; j++) {
-			printf("[%d] ", arr[i][j]);
-		}
-		printf("\n");
-	}
-	*/
 
 	r = 0;
 	c = 0;
 
-	//MAIN LOOP SOLVER
+	//MAIN LOOP 
 	while (1) {
 
+		//Clear Data
 		for (i = 0; i < 26; i++) {
 			visited[i] = ' ';
 			distances[i] = 999;
 			prevnode[i] = ' ';
 		}
 
+		//User Input Root Node
 		while (1) {
 			printf("\nEnter root vertex: \n");
 			scanf_s("\n%c", &root);
@@ -116,6 +108,7 @@ c = 0;
 			else break;
 		}
 
+		//User Input Target Node
 		while (1) {
 			printf("\nEnter target vertex: ");
 			scanf_s("\n%c", &target);
@@ -128,32 +121,23 @@ c = 0;
 		iroot = root - A;
 		itarget = target - A;
 
-		//////////////////////////////////////////////////////////////
-
+		//Algorithm Start
 		curr = root;
 		adder = 0;
 		bool here = false, ihere = false;
 
-		for (j = 0; j < len; j++) {								//	MAIN DIJKSTRA LOOP
-
-			for (i = 0; i < len; i++) {								//Update old values
+		//	MAIN DIJKSTRA LOOP
+		for (j = 0; j < len; j++) {
+			
+			//Update old values
+			for (i = 0; i < len; i++) {								
 				if (arr[curr - A][i] + adder < distances[i]) {
 					distances[i] = arr[curr - A][i] + adder;
 					prevnode[i] = curr;
 				}
 			}
 
-			printf("\n");
-			for (i = 0; i < len; i++) {
-				if (A + i == root) {
-					printf("N/A\t");
-				}
-				else printf("%d\t", distances[i]);
-			}
-
-			/////////////////////find next values
-
-			printf("\nCURRENT NODE: %c\n", curr);
+			//Find next values
 			visited[j] = curr;
 			prev = curr;
 			char temp;
@@ -177,23 +161,29 @@ c = 0;
 				
 			}
 
+			//Update Adder and current node for next loop iteration
 			curr = A + itemp;
 			adder = distances[itemp];
-
-
-			printf("\nCURRENT NODE: %c\n", curr);
-			printf("\nADDER: %d\n", adder);
 		}
 
+		//Display Results
+		printf("\nShortest path from vertex %c to vertex %c: %d\n\nPath routing: \n", root, target, distances[target-A]);
+		
+		curr = target;
+		while (curr != root) {
+			printf("%c\t<\t", curr);
+			curr = prevnode[curr - A];
+		}
+		printf("%c\n", root);
 
-		printf("\nShortest path from vertex %c to vertex %c: %d\n", root, target, distances[target-A]);
 
-		printf("\nShortest path to each vertex: \n");
-		char ctemp = 'A';
+		printf("\nShortest path to each vertex from root %c: \n", root);
+		
+		curr = 'A';
 		for (i = 0; i < len; i++) {
 			
-			printf("%c\t", ctemp);
-			ctemp = ctemp + 1;
+			printf("%c\t", curr);
+			curr = curr + 1;
 		}
 		printf("\n");
 		for (i = 0; i < len; i++) {
@@ -202,14 +192,8 @@ c = 0;
 			}
 			else printf("%d\t", distances[i]);
 		}
+
 		printf("\n");
-		for (i = 0; i < len; i++) {
-			printf("%c\t", prevnode[i]);
-		}
-		printf("\n");
-		for (i = 0; i < len; i++) {
-			printf("%c\t", visited[i]);
-		}
 	}
 
 
